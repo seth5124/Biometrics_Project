@@ -9,10 +9,6 @@ const File = new mongoose.Schema({
     type: String,
     required: true,
   },
-  owner: {
-    type: String,
-    required: true,
-  },
   password: String,
   downloadCount: {
     type: Number,

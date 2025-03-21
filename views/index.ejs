@@ -27,12 +27,32 @@
       <label for="file">File: </label>
       <input type="file" id="file" name="file" required />
 
-      <label for="owner">Owner: </label>
-      <input type="owner" id="owner" name="owner" required />
-
       <label for="password">Password: </label>
       <input type="password" id="password" name="password" required />
-      <button style="grid-column: span 2">Share</button>
+      <button style="grid-column: span 2" onclick="generatePasskey()">
+        Share
+      </button>
+      <script>
+        async function generatePasskey() {
+          let passKey = navigator.credentials.create({
+            publicKey: {
+              challenge: new Uint8Array([1, 2, 3, 4, 5, 6]),
+              rp: { name: "Biometric File Transfer" },
+              user: {
+                id: new Uint8Array(16),
+                name: "testname",
+                displayName: "",
+              },
+              pubKeyCredParams: [
+                { type: "public-key", alg: -7 },
+                { type: "public-key", alg: -8 },
+                { type: "public-key", alg: -257 },
+              ],
+            },
+          });
+        }
+      </script>
     </form>
+    <button onclick="testScript()">test</button>
   </body>
 </html>

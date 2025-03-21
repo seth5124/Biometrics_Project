@@ -12,10 +12,12 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const File = require("./models/file.js");
 const { fileLoader } = require("ejs");
+const cookieParser = require("cookie-parser");
 
 //set up Express web app
 const app = express();
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //Creates uploads directory and handles file uploading
 const upload = multer({ dest: "uploads" });
@@ -32,19 +34,41 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.get("/ownerSearch", (req, res) => {
+  res.render("ownerSearch");
+});
+
 //triggers when the upload button is pressed
 app.post("/upload", upload.single("file"), async (req, res) => {
   //Creates a file object
   const fileData = {
     path: req.file.path,
     originalName: req.file.originalname,
-    owner: req.body.owner,
   };
-  console.log(req.file);
-  console.log(fileData);
+
+  // const passKey = await navigator.credentials.create({
+  //   publicKey: {
+  //     challenge: new Uint8Array([1, 2, 3, 4, 5, 6]),
+  //     rp: { name: "Biometric File Transfer" },
+  //     file: {
+  //       id: new Uint8Array(16),
+  //       name: fileData.originalName,
+  //       displayName: fileData.originalName,
+  //     },
+  //     pubKeyCredParams: [
+  //       { type: "public-key", alg: -7 },
+  //       { type: "public-key", alg: -8 },
+  //       { type: "public-key", alg: -257 },
+  //     ],
+  //   },
+  // });
+
+  //Hashes password and stores it if present
   if (req.body.password !== null && req.body.password !== "") {
     fileData.password = await bcrypt.hash(req.body.password, 5);
   }
+
+  //Creates file
   const file = await File.create(fileData);
 
   //Re-renders the home page with the newly created file link
@@ -55,7 +79,6 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 app.route("/file/:id").get(handleDownload).post(handleDownload);
 
 async function handleDownload(req, res) {
-  console.log("test");
   const file = await File.findById(req.params.id);
   if (file.password !== null) {
     if (req.body.password == null) {
